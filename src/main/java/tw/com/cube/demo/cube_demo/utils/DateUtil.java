@@ -8,7 +8,6 @@ public interface DateUtil {
   /**
    * Format to YYYY/MM/dd HH:mm:ss
    *
-   * @param date
    * @return Date
    */
   Date dateTime(Date date);
@@ -16,7 +15,6 @@ public interface DateUtil {
   /**
    * Format to YYYY/MM/dd UTC
    *
-   * @param date
    * @return Date
    */
   Date formatDate(Date date);
@@ -24,7 +22,6 @@ public interface DateUtil {
   /**
    * Format to YYYY-MM-dd HH:mm:ssT UTC
    *
-   * @param date
    * @return Date
    */
   String formatDateString(Date date);
@@ -32,7 +29,6 @@ public interface DateUtil {
   /**
    * Format to YYYY/MM/dd HH:mm:ss
    *
-   * @param date
    * @return Date
    */
   Date parseDate(String date);
@@ -40,7 +36,6 @@ public interface DateUtil {
   /**
    * Format to YYYY/MM/dd HH:mm:ss
    *
-   * @param date
    * @return Date
    */
   Date parseDate2(String date);
@@ -48,7 +43,6 @@ public interface DateUtil {
   /**
    * get past year date
    *
-   * @param year
    * @return Date
    */
   Date pastYear(int year);
@@ -56,7 +50,6 @@ public interface DateUtil {
   /**
    * get past day date
    *
-   * @param day
    * @return Date
    */
   Date pastDay(int day);
