@@ -7,17 +7,27 @@ import java.math.BigDecimal;
 import java.net.*;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import tw.com.cube.demo.cube_demo.dao.domain.ExchangeTransaction;
+import tw.com.cube.demo.cube_demo.dao.dto.ExchangeTransactionDto;
+import tw.com.cube.demo.cube_demo.dao.po.ExchangeTransaction;
 import tw.com.cube.demo.cube_demo.dao.repository.ExchangeTransactionRepository;
+import tw.com.cube.demo.cube_demo.dao.vo.ReturnVo;
+import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.Error;
+import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.Fail;
+import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.Success;
 import tw.com.cube.demo.cube_demo.utils.DateUtil;
+import tw.com.cube.demo.cube_demo.utils.MessageType;
 
 @Service
 @RequiredArgsConstructor
 public class ExchangeTransactionService extends AbstractBasicService {
+  Logger logger = LoggerFactory.getLogger(ExchangeTransactionService.class);
   private final DateUtil dateUtil;
   private final ExchangeTransactionRepository exchangeTransactionRepository;
 
+  /** get data from API then write tp DB */
   public void getExchangeTransaction() {
     try {
       URL url = new URL("https://openapi.taifex.com.tw/v1/DailyForeignExchangeRates");
@@ -35,20 +45,31 @@ public class ExchangeTransactionService extends AbstractBasicService {
       List<Map<String, Object>> object = convertJson(response.toString());
       write(object);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error(e.getMessage());
     }
   }
 
+  /**
+   * format data to json
+   *
+   * @param response
+   * @return
+   */
   private List<Map<String, Object>> convertJson(String response) {
     try {
       ObjectMapper objectMapper = new ObjectMapper();
       return objectMapper.readValue(response, new TypeReference<List<Map<String, Object>>>() {});
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error(e.getMessage());
       return null;
     }
   }
 
+  /**
+   * write USD/NTD to DB
+   *
+   * @param responseObject
+   */
   private void write(List<Map<String, Object>> responseObject) {
     for (Map<String, Object> map : responseObject) {
       List<ExchangeTransaction> exchangeTransactions = new ArrayList<>();
@@ -61,11 +82,17 @@ public class ExchangeTransactionService extends AbstractBasicService {
     }
   }
 
+  /**
+   * get exchange currency history
+   *
+   * @param params
+   * @return
+   */
   public String getHistory(Map<String, String> params) {
-    Map<String, Object> result = new HashMap<>();
-    Map<String, Object> fail = new HashMap<>();
-    Map<String, Object> success = new HashMap<>();
-    Map<String, Object> error = new HashMap<>();
+    ReturnVo result = new ReturnVo();
+    Fail fail = new Fail();
+    Success success = new Success();
+    Error error = new Error();
     String startDateParam = params.get("startDate");
     String endDateParam = params.get("endDate");
     String currency = params.get("currency");
@@ -79,46 +106,49 @@ public class ExchangeTransactionService extends AbstractBasicService {
     if (Objects.isNull(startDateParam)
         || Objects.isNull(endDateParam)
         || Objects.isNull(currency)) {
-      error.put("code", "E001");
-      error.put("messqge", "起迄日期及幣別不得為空");
-      result.put("error", error);
-      fail.put("error", error);
-      result.put("Failed", fail);
+      error.setCode(MessageType.MSG_E002.getCode());
+      error.setMessage(MessageType.MSG_E002.getMessage());
+      fail.setError(error);
+      result.setFail(fail);
       return apiResponse(result);
     }
     try {
       Date startDate = dateUtil.parseDate2(startDateParam);
       Date endDate = dateUtil.parseDate2(endDateParam);
       if (startDate.before(dateUtil.pastYear(1)) || endDate.after(dateUtil.pastDay(1))) {
-        error.put("code", "E001");
-        error.put("messqge", "日期區間不符");
-        fail.put("error", error);
-        result.put("Failed", fail);
+        error.setCode(MessageType.MSG_E001.getCode());
+        error.setMessage(MessageType.MSG_E001.getMessage());
+        fail.setError(error);
+        result.setFail(fail);
         return apiResponse(result);
       }
       List<ExchangeTransaction> exchangeTransactions =
           exchangeTransactionRepository.findHistoryByCurrencyUnit(
               startDate, endDate, currency.toUpperCase());
-      List<Map<String, String>> exchangeTransactionList = new ArrayList<>();
+      List<ExchangeTransactionDto> exchangeTransactionList = new ArrayList<>();
       for (ExchangeTransaction exchangeTransaction : exchangeTransactions) {
-        Map<String, String> map = new HashMap<>();
-        map.put("date", dateUtil.formatDateString(exchangeTransaction.getDate()));
-        map.put(currency, exchangeTransaction.getExchangeCurrencyPrice().toString());
-        exchangeTransactionList.add(map);
+        ExchangeTransactionDto exchangeTransactionDto = new ExchangeTransactionDto();
+        exchangeTransactionDto.setDate(dateUtil.formatDateString(exchangeTransaction.getDate()));
+        exchangeTransactionDto.setCurrency(
+            exchangeTransaction.getExchangeCurrencyPrice().toString());
+        exchangeTransactionList.add(exchangeTransactionDto);
       }
-      error.put("code", "0000");
-      error.put("message", "成功");
-      success.put("error", error);
-      success.put("currency", exchangeTransactionList);
-      result.put("Success", success);
-      return apiResponse(result);
+      error.setCode(MessageType.MSG_0000.getCode());
+      error.setMessage(MessageType.MSG_0000.getMessage());
+      success.setError(error);
+      success.setCurrency(exchangeTransactionList);
+      result.setSuccess(success);
+      return (currency.toUpperCase()).equals("USD")
+          ? apiResponse(result)
+          : apiResponse(result).replace("usd", currency.toLowerCase());
 
     } catch (Exception e) {
-      e.printStackTrace();
-      error.put("code", "E001");
-      error.put("messqge", "其他錯誤");
-      fail.put("error", error);
-      result.put("Failed", fail);
+      logger.error(e.getMessage());
+      error.setCode(MessageType.MSG_E999.getCode());
+      error.setMessage(MessageType.MSG_E999.getMessage());
+      ;
+      fail.setError(error);
+      result.setFail(fail);
       return apiResponse(result);
     }
   }

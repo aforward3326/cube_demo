@@ -13,8 +13,20 @@ public interface DateUtil {
    */
   public Date dateTime(Date date);
 
+  /**
+   * Format to YYYY/MM/dd UTC
+   *
+   * @param date
+   * @return Date
+   */
   public Date formatDate(Date date);
 
+  /**
+   * Format to YYYY-MM-dd HH:mm:ssT UTC
+   *
+   * @param date
+   * @return Date
+   */
   public String formatDateString(Date date);
 
   /**
@@ -33,7 +45,19 @@ public interface DateUtil {
    */
   public Date parseDate2(String date);
 
+  /**
+   * get past year date
+   *
+   * @param year
+   * @return Date
+   */
   public Date pastYear(int year);
 
+  /**
+   * get past day date
+   *
+   * @param day
+   * @return Date
+   */
   public Date pastDay(int day);
 }

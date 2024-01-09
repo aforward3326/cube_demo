@@ -14,6 +14,12 @@ import tw.com.cube.demo.cube_demo.service.ExchangeTransactionService;
 public class ForexController extends AbstractBasicController {
   @Autowired ExchangeTransactionService exchangeTransactionService;
 
+  /**
+   * get exchange currency history
+   *
+   * @param paramMap
+   * @return ResponseEntity<String>
+   */
   @PostMapping()
   public ResponseEntity<String> getHistory(@RequestBody Map<String, String> paramMap) {
     return returnResponse(exchangeTransactionService.getHistory(paramMap));

@@ -6,6 +6,12 @@ import org.springframework.http.ResponseEntity;
 
 public abstract class AbstractBasicController {
 
+  /**
+   * API Response Object
+   *
+   * @param reqData
+   * @return
+   */
   protected static ResponseEntity<String> returnResponse(String reqData) {
     HttpHeaders responseHeaders = new HttpHeaders();
     responseHeaders.add("Content-Type", "application/json; charset=utf-8");

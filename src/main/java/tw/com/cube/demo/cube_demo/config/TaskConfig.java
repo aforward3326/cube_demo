@@ -9,6 +9,7 @@ import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import tw.com.cube.demo.cube_demo.task.QuartzTask;
 
+/** Quartz task Configuration */
 @Configuration
 public class TaskConfig {
   @Bean(name = "scheduler")
@@ -32,7 +33,7 @@ public class TaskConfig {
 
   @Bean
   public CronTriggerFactoryBean jobTrigger(JobDetail jobDetail) {
-    String cron = "0 0 18  * * ? *";
+    String cron = "0 0 18  * * ? *"; // Setting task time
     CronTriggerFactoryBean trigger = new CronTriggerFactoryBean();
     trigger.setJobDetail(jobDetail);
     trigger.setCronExpression(cron);
