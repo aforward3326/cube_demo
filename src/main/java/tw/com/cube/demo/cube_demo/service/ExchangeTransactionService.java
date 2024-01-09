@@ -43,7 +43,7 @@ public class ExchangeTransactionService extends AbstractBasicService {
       }
       reader.close();
       List<Map<String, Object>> object = convertJson(response.toString());
-      if(Objects.nonNull(object)){
+      if (Objects.nonNull(object)) {
         write(object);
       }
 
@@ -67,10 +67,7 @@ public class ExchangeTransactionService extends AbstractBasicService {
     }
   }
 
-  /**
-   * write USD/NTD to DB
-   *
-   */
+  /** write USD/NTD to DB */
   private void write(List<Map<String, Object>> responseObject) {
     for (Map<String, Object> map : responseObject) {
       List<ExchangeTransaction> exchangeTransactions = new ArrayList<>();
@@ -87,10 +84,7 @@ public class ExchangeTransactionService extends AbstractBasicService {
     }
   }
 
-  /**
-   * get exchange currency history
-   *
-   */
+  /** get exchange currency history */
   public String getHistory(Map<String, String> params) {
     ReturnVo result = new ReturnVo();
     Fail fail = new Fail();
