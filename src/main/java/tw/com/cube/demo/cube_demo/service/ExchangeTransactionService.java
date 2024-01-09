@@ -37,13 +37,16 @@ public class ExchangeTransactionService extends AbstractBasicService {
       BufferedReader reader =
           new BufferedReader(new InputStreamReader(connection.getInputStream()));
       String line;
-      StringBuffer response = new StringBuffer();
+      StringBuilder response = new StringBuilder();
       while ((line = reader.readLine()) != null) {
         response.append(line);
       }
       reader.close();
       List<Map<String, Object>> object = convertJson(response.toString());
-      write(object);
+      if(Objects.nonNull(object)){
+        write(object);
+      }
+
     } catch (Exception e) {
       logger.error(e.getMessage());
     }
@@ -52,13 +55,12 @@ public class ExchangeTransactionService extends AbstractBasicService {
   /**
    * format data to json
    *
-   * @param response
-   * @return
+   * @return List<Map<String, Object>>
    */
   private List<Map<String, Object>> convertJson(String response) {
     try {
       ObjectMapper objectMapper = new ObjectMapper();
-      return objectMapper.readValue(response, new TypeReference<List<Map<String, Object>>>() {});
+      return objectMapper.readValue(response, new TypeReference<>() {});
     } catch (Exception e) {
       logger.error(e.getMessage());
       return null;
@@ -68,16 +70,19 @@ public class ExchangeTransactionService extends AbstractBasicService {
   /**
    * write USD/NTD to DB
    *
-   * @param responseObject
    */
   private void write(List<Map<String, Object>> responseObject) {
     for (Map<String, Object> map : responseObject) {
       List<ExchangeTransaction> exchangeTransactions = new ArrayList<>();
-      Date datef = dateUtil.parseDate((String) map.get("Date"));
-      Date date = dateUtil.dateTime(datef);
+      Date dated = dateUtil.parseDate((String) map.get("Date"));
+      Date date = dateUtil.dateTime(dated);
       BigDecimal USD_NTD = new BigDecimal((String) map.get("USD/NTD"));
-      exchangeTransactions.add(
-          new ExchangeTransaction(null, date, "USD", BigDecimal.ONE, "NTD", USD_NTD));
+      List<ExchangeTransaction> getExist =
+          exchangeTransactionRepository.findHistory(date, "USD", "NTD");
+      if (getExist.isEmpty()) {
+        exchangeTransactions.add(
+            new ExchangeTransaction(null, date, "USD", BigDecimal.ONE, "NTD", USD_NTD));
+      }
       exchangeTransactionRepository.saveAll(exchangeTransactions);
     }
   }
@@ -85,8 +90,6 @@ public class ExchangeTransactionService extends AbstractBasicService {
   /**
    * get exchange currency history
    *
-   * @param params
-   * @return
    */
   public String getHistory(Map<String, String> params) {
     ReturnVo result = new ReturnVo();
@@ -138,7 +141,7 @@ public class ExchangeTransactionService extends AbstractBasicService {
       success.setError(error);
       success.setCurrency(exchangeTransactionList);
       result.setSuccess(success);
-      return (currency.toUpperCase()).equals("USD")
+      return (currency).equalsIgnoreCase("USD")
           ? apiResponse(result)
           : apiResponse(result).replace("usd", currency.toLowerCase());
 
@@ -146,7 +149,6 @@ public class ExchangeTransactionService extends AbstractBasicService {
       logger.error(e.getMessage());
       error.setCode(MessageType.MSG_E999.getCode());
       error.setMessage(MessageType.MSG_E999.getMessage());
-      ;
       fail.setError(error);
       result.setFail(fail);
       return apiResponse(result);

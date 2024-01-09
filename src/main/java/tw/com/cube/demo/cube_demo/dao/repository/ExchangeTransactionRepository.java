@@ -11,7 +11,11 @@ import tw.com.cube.demo.cube_demo.dao.po.ExchangeTransaction;
 public interface ExchangeTransactionRepository
     extends MongoRepository<ExchangeTransaction, String> {
 
+  @Query("{'$and': [{'date':  ?0 }, {'currencyUnit': ?1},{'exchangeCurrencyUnit': ?2}]}")
+  List<ExchangeTransaction> findHistory(
+      Date date, String currencyUnit, String exchangeCurrencyUnit);
+
   @Query("{'$and': [{'date': {'$gte':  ?0 , '$lte':  ?1 }}, {'currencyUnit': ?2}]}")
   List<ExchangeTransaction> findHistoryByCurrencyUnit(
-      Date startDate, Date endDate, String CurrencyUnit);
+      Date startDate, Date endDate, String currencyUnit);
 }
