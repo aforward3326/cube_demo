@@ -9,6 +9,7 @@ import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import tw.com.cube.demo.cube_demo.dao.dto.ExchangeTransactionDto;
 import tw.com.cube.demo.cube_demo.dao.po.ExchangeTransaction;
@@ -30,8 +31,8 @@ public class ExchangeTransactionService extends BasicService {
   private final ExchangeTransactionRepository exchangeTransactionRepository;
 
   /** get data from API then write tp DB */
+  @Scheduled(cron = "0 0 18 * * ?")
   public void getExchangeTransaction() {
-
     try {
       logger.info("===========Start get Exchange Transaction============");
       logger.info("Start Time :" + dateUtil.formatDateString(new Date(), 5));
