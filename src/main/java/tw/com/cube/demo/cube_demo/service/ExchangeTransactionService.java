@@ -15,6 +15,7 @@ import tw.com.cube.demo.cube_demo.dao.po.ExchangeTransaction;
 import tw.com.cube.demo.cube_demo.dao.repository.ExchangeTransactionRepository;
 import tw.com.cube.demo.cube_demo.dao.vo.ReturnVo;
 import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.Error;
+import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.ExchangeTransactionApiVo;
 import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.Fail;
 import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.Success;
 import tw.com.cube.demo.cube_demo.utils.DateUtil;
@@ -85,21 +86,14 @@ public class ExchangeTransactionService extends AbstractBasicService {
   }
 
   /** get exchange currency history */
-  public String getHistory(Map<String, String> params) {
+  public String getHistory(ExchangeTransactionApiVo params) {
     ReturnVo result = new ReturnVo();
     Fail fail = new Fail();
     Success success = new Success();
     Error error = new Error();
-    String startDateParam = params.get("startDate");
-    String endDateParam = params.get("endDate");
-    String currency = params.get("currency");
-    if (Objects.isNull(currency)) {
-      for (String key : params.keySet()) {
-        if (key.contains("currency")) {
-          currency = params.get(key);
-        }
-      }
-    }
+    String startDateParam = params.getStartDate();
+    String endDateParam = params.getEndDate();
+    String currency = params.getCurrency();
     if (Objects.isNull(startDateParam)
         || Objects.isNull(endDateParam)
         || Objects.isNull(currency)) {
