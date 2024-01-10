@@ -6,39 +6,49 @@ import org.springframework.stereotype.Component;
 @Component
 public interface DateUtil {
   /**
-   * Format to YYYY/MM/dd HH:mm:ss
+   * Format Date (UTC) 1.yyyyMMdd 2.YYYY/MM/dd 3.YYYY-MM-dd 4.yyyyMMddHHmmss 5.yyyy-MM-dd HH:mm:ss
+   * 6.yyyy/MM/dd HH:mm:ss
    *
    * @return Date
    */
-  Date dateTime(Date date);
+  Date formatDate(Date date, int type);
 
   /**
-   * Format to YYYY/MM/dd UTC
+   * Format Date (UTC)
    *
    * @return Date
    */
-  Date formatDate(Date date);
+  Date formatDate(Date date, String formatDate);
 
   /**
-   * Format to YYYY-MM-dd HH:mm:ssT UTC
+   * Format date to string (UTC)
    *
    * @return Date
    */
-  String formatDateString(Date date);
+  String formatDateString(Date date, String formatDate);
 
   /**
-   * Format to YYYY/MM/dd HH:mm:ss
+   * Format date to string (UTC) 1.yyyyMMdd 2.YYYY/MM/dd 3.YYYY-MM-dd 4.yyyyMMddHHmmss 5.yyyy-MM-dd
+   * HH:mm:ss * 6.yyyy/MM/dd HH:mm:ss
    *
    * @return Date
    */
-  Date parseDate(String date);
+  String formatDateString(Date date, int type);
 
   /**
-   * Format to YYYY/MM/dd HH:mm:ss
+   * Parse String to Date (UTC)
    *
    * @return Date
    */
-  Date parseDate2(String date);
+  Date parseDate(String date, String formatDate);
+
+  /**
+   * Parse String to Date (UTC) 1.yyyyMMdd 2.YYYY/MM/dd 3.YYYY-MM-dd 4.yyyyMMddHHmmss 5.yyyy-MM-dd
+   * HH:mm:ss 6.yyyy/MM/dd HH:mm:ss
+   *
+   * @return Date
+   */
+  Date parseDate(String date, int type);
 
   /**
    * get past year date

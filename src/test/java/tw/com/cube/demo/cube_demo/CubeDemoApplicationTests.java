@@ -11,8 +11,6 @@ import tw.com.cube.demo.cube_demo.task.batch.task.GeneralTask;
 class CubeDemoApplicationTests {
   @Autowired private ExchangeTransactionService exchangeTransactionService;
 
-  @Autowired private GeneralTask generalTask;
-
   /** test for loading from API */
   @Test
   void loadingFromAPI() {
@@ -20,14 +18,9 @@ class CubeDemoApplicationTests {
   }
 
   @Test
-  void loadingFromAPI_SpringBatch() {
-    generalTask.startGetAPI();
-  }
-
-  @Test
   void forexAPI_Success() {
     ExchangeTransactionApiVo vo = new ExchangeTransactionApiVo();
-    vo.setStartDate("2024/01/02");
+    vo.setStartDate("2024-01-02");
     vo.setEndDate("2024/01/02");
     vo.setCurrency("usd");
     System.out.println(exchangeTransactionService.getHistory(vo));
