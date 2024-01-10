@@ -4,13 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 import tw.com.cube.demo.cube_demo.service.ExchangeTransactionService;
 
 @Configuration
 @Component
-@EnableScheduling
+//@EnableScheduling
 @RequiredArgsConstructor
 public class QuartzTask {
 
@@ -21,7 +20,7 @@ public class QuartzTask {
   /** Call Get Exchange Transaction */
   public void startGetApi() {
     logger.info("==========Start Get Exchange Transaction==========");
-    exchangeTransactionService.getExchangeTransaction();
+    //    exchangeTransactionService.getExchangeTransaction();
     logger.info("==========End Get Exchange Transaction==========");
   }
 }
