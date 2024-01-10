@@ -87,6 +87,7 @@ public class GeneralTask extends AbstractBaseTask<String> {
 
   @Override
   public List<String> getItemsForProcessing() {
+    files.add("");
 
     return files;
   }
@@ -96,5 +97,8 @@ public class GeneralTask extends AbstractBaseTask<String> {
   protected void beforeRun() {}
 
   @Override
-  protected void afterRun() {}
+  protected void afterRun() {
+
+    log.info("General Task End\n");
+  }
 }

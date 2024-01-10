@@ -83,6 +83,9 @@ public class ExchangeTransactionService extends BasicService {
         exchangeTransactions.add(
             new ExchangeTransaction(null, date, "USD", BigDecimal.ONE, "NTD", USD_NTD));
       }
+      for (ExchangeTransaction exchangeTransaction : exchangeTransactions) {
+        logger.info(exchangeTransaction.toString());
+      }
       exchangeTransactionRepository.saveAll(exchangeTransactions);
     }
   }
