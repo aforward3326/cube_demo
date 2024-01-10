@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.ExchangeTransactionApiVo;
 import tw.com.cube.demo.cube_demo.service.ExchangeTransactionService;
-import tw.com.cube.demo.cube_demo.task.batch.task.GeneralTask;
 
 @SpringBootTest
 class CubeDemoApplicationTests {
@@ -20,7 +19,7 @@ class CubeDemoApplicationTests {
   @Test
   void forexAPI_Success() {
     ExchangeTransactionApiVo vo = new ExchangeTransactionApiVo();
-    vo.setStartDate("2024-01-02");
+    vo.setStartDate("2024-01/02");
     vo.setEndDate("2024/01/02");
     vo.setCurrency("usd");
     System.out.println(exchangeTransactionService.getHistory(vo));
@@ -48,6 +47,15 @@ class CubeDemoApplicationTests {
   void forexAPI_Error_NullValue() {
     ExchangeTransactionApiVo vo = new ExchangeTransactionApiVo();
     vo.setStartDate("2022/01/02");
+    vo.setCurrency("usd");
+    System.out.println(exchangeTransactionService.getHistory(vo));
+  }
+
+  @Test
+  void forexAPI_Error_WrongFormatValue() {
+    ExchangeTransactionApiVo vo = new ExchangeTransactionApiVo();
+    vo.setStartDate("2022-01-02");
+    vo.setEndDate("2022/01/02");
     vo.setCurrency("usd");
     System.out.println(exchangeTransactionService.getHistory(vo));
   }
