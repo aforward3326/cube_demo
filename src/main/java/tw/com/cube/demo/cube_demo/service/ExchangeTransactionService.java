@@ -9,7 +9,6 @@ import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import tw.com.cube.demo.cube_demo.dao.dto.ExchangeTransactionDto;
 import tw.com.cube.demo.cube_demo.dao.po.ExchangeTransaction;
@@ -24,13 +23,12 @@ import tw.com.cube.demo.cube_demo.utils.MessageType;
 
 @Service
 @RequiredArgsConstructor
-public class ExchangeTransactionService extends AbstractBasicService {
+public class ExchangeTransactionService extends BasicService {
   Logger logger = LoggerFactory.getLogger(ExchangeTransactionService.class);
   private final DateUtil dateUtil;
   private final ExchangeTransactionRepository exchangeTransactionRepository;
 
   /** get data from API then write tp DB */
-  @Scheduled(cron = "0 0 18 * * ?")
   public void getExchangeTransaction() {
     logger.info("==========Start Get Exchange Transaction==========");
     try {
@@ -127,6 +125,13 @@ public class ExchangeTransactionService extends AbstractBasicService {
         exchangeTransactionDto.setCurrency(
             exchangeTransaction.getExchangeCurrencyPrice().toString());
         exchangeTransactionList.add(exchangeTransactionDto);
+      }
+      if (exchangeTransactionList.isEmpty()) {
+        error.setCode(MessageType.MSG_E090.getCode());
+        error.setMessage(MessageType.MSG_E090.getMessage());
+        fail.setError(error);
+        result.setFail(fail);
+        return apiResponse(result);
       }
       error.setCode(MessageType.MSG_0000.getCode());
       error.setMessage(MessageType.MSG_0000.getMessage());

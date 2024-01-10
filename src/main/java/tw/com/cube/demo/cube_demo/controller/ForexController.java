@@ -11,7 +11,7 @@ import tw.com.cube.demo.cube_demo.service.ExchangeTransactionService;
 
 @Controller
 @RequestMapping("/forexApi")
-public class ForexController extends AbstractBasicController {
+public class ForexController extends BasicController {
   @Autowired ExchangeTransactionService exchangeTransactionService;
 
   /**

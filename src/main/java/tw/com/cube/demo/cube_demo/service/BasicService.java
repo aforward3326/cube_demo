@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import tw.com.cube.demo.cube_demo.dao.vo.ReturnVo;
 
-public abstract class AbstractBasicService {
+public class BasicService {
 
   /**
    * Map<String, Object> to Json String
