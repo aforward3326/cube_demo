@@ -7,6 +7,8 @@ public enum MessageType {
   MSG_0000("0000", "成功"),
   MSG_E001("E001", "日期區間不符"),
   MSG_E002("E002", "起迄日期及幣別不得為空"),
+  MSG_E003("E003", "日期格式錯誤"),
+  MSG_E004("E004", "幣別格式錯誤"),
   MSG_E090("E090", "查無資料"),
   MSG_E999("E999", "其他錯誤，請洽管理員");
   @Getter @Setter private String code;

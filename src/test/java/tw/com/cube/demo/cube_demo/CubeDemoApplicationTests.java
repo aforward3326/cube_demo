@@ -18,7 +18,6 @@ class CubeDemoApplicationTests {
   void loadingFromAPI() {
     exchangeTransactionService.getExchangeTransaction();
   }
-
   @Test
   void loadingFromAPI_SpringBatch() {
     generalTask.startGetAPI();
