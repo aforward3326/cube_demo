@@ -94,7 +94,7 @@ cube_demo/src/test/java/tw/com/cube/demo/cube_demo/CubeDemoApplicationTests.java
     exchangeTransactionService.getExchangeTransaction();
   }
 
-/*for branch dev-spring-task*/
+/*for branch dev-spring-batch*/
   @Test
   void loadingFromAPI_SpringBatch() {
     generalTask.startGetAPI();
