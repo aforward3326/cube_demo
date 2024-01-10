@@ -29,7 +29,6 @@ public class ExchangeTransactionService extends AbstractBasicService {
   private final DateUtil dateUtil;
   private final ExchangeTransactionRepository exchangeTransactionRepository;
 
-
   /** get data from API then write tp DB */
   @Scheduled(cron = "0 0 18 * * ?")
   public void getExchangeTransaction() {
