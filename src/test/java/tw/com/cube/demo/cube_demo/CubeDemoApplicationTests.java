@@ -61,7 +61,8 @@ class CubeDemoApplicationTests {
   @Test
   void forexAPI_Error_WrongFormatValue() {
     ExchangeTransactionApiVo vo = new ExchangeTransactionApiVo();
-    vo.setStartDate("2022-01-02");
+    vo.setStartDate("2024-01-02");
+    vo.setEndDate("2024-01-02");
     vo.setCurrency("usd");
     System.out.println(exchangeTransactionService.getHistory(vo));
   }
