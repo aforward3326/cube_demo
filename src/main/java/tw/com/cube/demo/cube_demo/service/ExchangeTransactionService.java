@@ -10,14 +10,13 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tw.com.cube.demo.cube_demo.config.ApiUriConfig;
 import tw.com.cube.demo.cube_demo.dao.dto.ExchangeTransactionDto;
 import tw.com.cube.demo.cube_demo.dao.po.ExchangeTransaction;
 import tw.com.cube.demo.cube_demo.dao.repository.ExchangeTransactionRepository;
-import tw.com.cube.demo.cube_demo.dao.vo.ReturnVo;
+import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.*;
 import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.Error;
-import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.ExchangeTransactionApiVo;
-import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.Fail;
-import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.Success;
+import tw.com.cube.demo.cube_demo.exception.InvalidDateFormatException;
 import tw.com.cube.demo.cube_demo.exception.NoDataException;
 import tw.com.cube.demo.cube_demo.utils.DateUtil;
 import tw.com.cube.demo.cube_demo.utils.MessageType;
@@ -28,14 +27,15 @@ public class ExchangeTransactionService extends BasicService {
   Logger logger = LoggerFactory.getLogger(ExchangeTransactionService.class);
   private final DateUtil dateUtil;
   private final ExchangeTransactionRepository exchangeTransactionRepository;
+  private final ApiUriConfig apiUriConfig;
 
   /** get data from API then write tp DB */
   public void getExchangeTransaction() {
-    logger.info("==========Start Get Exchange Transaction==========");
+    String endTime = "";
     try {
       logger.info("===========Start get Exchange Transaction============");
-      logger.info("Start Time :" + dateUtil.formatDateString(new Date(), 5));
-      URL url = new URL("https://openapi.taifex.com.tw/v1/DailyForeignExchangeRates");
+      logger.info("Start Time : {}", dateUtil.formatDateString(new Date(), 5));
+      URL url = new URL(apiUriConfig.getForexApi());
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       connection.setRequestMethod("GET");
       connection.setRequestProperty("Content-Type", "application/json");
@@ -53,10 +53,16 @@ public class ExchangeTransactionService extends BasicService {
       } else {
         throw new NoDataException("No Data Found");
       }
-      logger.info("==========End Get Exchange Transaction==========");
+      endTime = dateUtil.formatDateString(new Date(), 5);
+    } catch (NoDataException ne) {
+      logger.error(ne.getMessage());
+    } catch (InvalidDateFormatException ie) {
+      logger.error(ie.getMessage());
     } catch (Exception e) {
       logger.error(e.getMessage());
-      logger.info("==========End Get Exchange Transaction==========");
+    } finally {
+      logger.info("End Time : {}", endTime);
+      logger.info("===========End get Exchange Transaction============");
     }
   }
 
@@ -71,51 +77,52 @@ public class ExchangeTransactionService extends BasicService {
       return objectMapper.readValue(response, new TypeReference<>() {});
     } catch (Exception e) {
       logger.error(e.getMessage());
-      return null;
     }
+    return null;
   }
 
   /** write USD/NTD to DB */
   private void write(List<Map<String, Object>> responseObject) {
-    for (Map<String, Object> map : responseObject) {
-      List<ExchangeTransaction> exchangeTransactions = new ArrayList<>();
-      Date dated = dateUtil.parseDate((String) map.get("Date"), 6);
-      Date date = dateUtil.formatDate(dated, 5);
-      BigDecimal USD_NTD = new BigDecimal((String) map.get("USD/NTD"));
-      List<ExchangeTransaction> getExist =
-          exchangeTransactionRepository.findHistory(date, "USD", "NTD");
-      if (getExist.isEmpty()) {
-        exchangeTransactions.add(
-            new ExchangeTransaction(null, date, "USD", BigDecimal.ONE, "NTD", USD_NTD));
+    try {
+      for (Map<String, Object> map : responseObject) {
+        List<ExchangeTransaction> exchangeTransactions = new ArrayList<>();
+        Date dated = dateUtil.parseDate((String) map.get("Date"), 1);
+        Date date = dateUtil.formatDate(dated, 5);
+        BigDecimal USD_NTD = new BigDecimal((String) map.get("USD/NTD"));
+        List<ExchangeTransaction> getExist =
+            exchangeTransactionRepository.findHistory(date, "USD", "NTD");
+        if (getExist.isEmpty()) {
+          exchangeTransactions.add(
+              new ExchangeTransaction(null, date, "USD", BigDecimal.ONE, "NTD", USD_NTD));
+        }
+        exchangeTransactionRepository.saveAll(exchangeTransactions);
+        if (exchangeTransactions.isEmpty()) {
+          logger.warn("No new data");
+        }
       }
-      for (ExchangeTransaction exchangeTransaction : exchangeTransactions) {
-        logger.info(exchangeTransaction.toString());
-      }
-      exchangeTransactionRepository.saveAll(exchangeTransactions);
-      if (exchangeTransactions.isEmpty()) {
-        logger.warn("No new data");
-      }
+    } catch (InvalidDateFormatException ie) {
+      logger.error(ie.getMessage());
     }
   }
 
   /** get exchange currency history */
   public String getHistory(ExchangeTransactionApiVo params) {
-    ReturnVo result = new ReturnVo();
-    Fail fail = new Fail();
+    ExchangeTransactionReturnVo result = new ExchangeTransactionReturnVo();
     Error error = new Error();
     String startDateParam = params.getStartDate().trim();
     String endDateParam = params.getEndDate().trim();
     String currency = params.getCurrency().trim();
-    String checkData = checkData(startDateParam, endDateParam, currency);
-
-    if (Objects.nonNull(checkData)) {
-      return checkData;
-    }
-    String checkValueFormat = checkValueFormat(startDateParam, endDateParam, currency);
-    if (Objects.nonNull(checkValueFormat)) {
-      return checkValueFormat;
-    }
     try {
+      String checkData = checkData(startDateParam, endDateParam, currency);
+
+      if (Objects.nonNull(checkData)) {
+        return checkData;
+      }
+      String checkValueFormat = checkValueFormat(currency);
+      if (Objects.nonNull(checkValueFormat)) {
+        return checkValueFormat;
+      }
+
       Date startDate = dateUtil.parseDate(startDateParam, 2);
       Date endDate = dateUtil.parseDate(endDateParam, 2);
       String checkDateRange = checkDateRange(startDate, endDate);
@@ -130,16 +137,20 @@ public class ExchangeTransactionService extends BasicService {
       } else {
         error.setCode(MessageType.MSG_E090.getCode());
         error.setMessage(MessageType.MSG_E090.getMessage());
-        fail.setError(error);
-        result.setFail(fail);
+        result.setError(error);
         return apiResponse(result);
       }
+    } catch (InvalidDateFormatException ie) {
+      logger.error(ie.getMessage());
+      error.setCode(MessageType.MSG_E003.getCode());
+      error.setMessage(MessageType.MSG_E003.getMessage());
+      result.setError(error);
+      return apiResponse(result);
     } catch (Exception e) {
       logger.error(e.getMessage());
       error.setCode(MessageType.MSG_E999.getCode());
       error.setMessage(MessageType.MSG_E999.getMessage());
-      fail.setError(error);
-      result.setFail(fail);
+      result.setError(error);
       return apiResponse(result);
     }
   }
@@ -148,60 +159,45 @@ public class ExchangeTransactionService extends BasicService {
     if (Objects.isNull(startDateParam)
         || Objects.isNull(endDateParam)
         || Objects.isNull(currency)) {
-      ReturnVo result = new ReturnVo();
-      Fail fail = new Fail();
+      ExchangeTransactionReturnVo result = new ExchangeTransactionReturnVo();
       Error error = new Error();
       error.setCode(MessageType.MSG_E002.getCode());
       error.setMessage(MessageType.MSG_E002.getMessage());
-      fail.setError(error);
-      result.setFail(fail);
+      result.setError(error);
       return apiResponse(result);
     } else {
       return null;
     }
   }
 
-  private String checkDateRange(Date startDate, Date endDate) {
-    ReturnVo result = new ReturnVo();
-    Fail fail = new Fail();
+  private String checkDateRange(Date startDate, Date endDate) throws InvalidDateFormatException {
+    ExchangeTransactionReturnVo result = new ExchangeTransactionReturnVo();
     Error error = new Error();
     if (startDate.before(dateUtil.pastYear(1)) || endDate.after(dateUtil.pastDay(1))) {
       error.setCode(MessageType.MSG_E001.getCode());
       error.setMessage(MessageType.MSG_E001.getMessage());
-      fail.setError(error);
-      result.setFail(fail);
+      result.setError(error);
       return apiResponse(result);
     } else {
       return null;
     }
   }
 
-  private String checkValueFormat(String startDateParam, String endDateParam, String currency) {
-    ReturnVo result = new ReturnVo();
-    Fail fail = new Fail();
+  private String checkValueFormat(String currency) throws InvalidDateFormatException {
+    ExchangeTransactionReturnVo result = new ExchangeTransactionReturnVo();
     Error error = new Error();
-
-    if (Objects.isNull(dateUtil.parseDate(startDateParam, 2))
-        || (Objects.isNull(dateUtil.parseDate(endDateParam, 2)))) {
-      error.setCode(MessageType.MSG_E003.getCode());
-      error.setMessage(MessageType.MSG_E003.getMessage());
-      fail.setError(error);
-      result.setFail(fail);
-      return apiResponse(result);
-    }
-    if (currency.equalsIgnoreCase("USD")) {
+    if (!currency.equals("USD")) {
       error.setCode(MessageType.MSG_E004.getCode());
       error.setMessage(MessageType.MSG_E004.getMessage());
-      fail.setError(error);
-      result.setFail(fail);
+      result.setError(error);
       return apiResponse(result);
     }
     return null;
   }
 
-  private String searchExchangeTransactionResult(List<ExchangeTransaction> exchangeTransactions) {
-    ReturnVo result = new ReturnVo();
-    Success success = new Success();
+  private String searchExchangeTransactionResult(List<ExchangeTransaction> exchangeTransactions)
+      throws InvalidDateFormatException {
+    ExchangeTransactionReturnVo result = new ExchangeTransactionReturnVo();
     Error error = new Error();
     List<ExchangeTransactionDto> exchangeTransactionList = new ArrayList<>();
     for (ExchangeTransaction exchangeTransaction : exchangeTransactions) {
@@ -212,12 +208,9 @@ public class ExchangeTransactionService extends BasicService {
     }
     error.setCode(MessageType.MSG_0000.getCode());
     error.setMessage(MessageType.MSG_0000.getMessage());
-    success.setError(error);
-    success.setCurrency(exchangeTransactionList);
-    result.setSuccess(success);
-    return (exchangeTransactions.get(0).getCurrencyUnit()).equalsIgnoreCase("USD")
-        ? apiResponse(result)
-        : apiResponse(result)
-            .replace("usd", exchangeTransactions.get(0).getCurrencyUnit().toLowerCase());
+    result.setError(error);
+    result.setCurrency(exchangeTransactionList);
+    return apiResponse(result)
+        .replace("currency", exchangeTransactions.get(0).getCurrencyUnit().toLowerCase());
   }
 }

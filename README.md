@@ -26,32 +26,10 @@ logging.level.org.springframework.data.mongodb.core.MongoTemplate=DEBUG
 
 ### Change Api Uri
 
-edit url
+src.main.resource.application.properties
 
-```java
-@Service
-@RequiredArgsConstructor
-public class ExchangeTransactionService extends AbstractBasicService {
-  Logger logger = LoggerFactory.getLogger(ExchangeTransactionService.class);
-  private final DateUtil dateUtil;
-  private final ExchangeTransactionRepository exchangeTransactionRepository;
-
-  /** get data from API then write tp DB */
-  public void getExchangeTransaction() {
-    logger.info("==========Start Get Exchange Transaction==========");
-    try {
-      URL url = new URL("https://openapi.taifex.com.tw/v1/DailyForeignExchangeRates"); 
-  //...ellipsis code
-      }
-      logger.info("==========End Get Exchange Transaction==========");
-    } catch (Exception e) {
-      logger.error(e.getMessage());
-      logger.info("==========End Get Exchange Transaction==========");
-    }
-  }
- //...ellipsis code
-  
-}
+```properties
+forex.api=https://openapi.taifex.com.tw/v1/DailyForeignExchangeRates 
 ```
 
 ## Schedule
@@ -60,7 +38,7 @@ public class ExchangeTransactionService extends AbstractBasicService {
 
 2. branch dev-scheduled-task ---> @Schedule Task
 
-3. branch dev-spring-task ---> Spring Batch  
+3. branch dev-spring-batch ---> Spring Batch  
 
    test: GET localhost:8080/forexApi/batch
 
@@ -92,12 +70,6 @@ cube_demo/src/test/java/tw/com/cube/demo/cube_demo/CubeDemoApplicationTests.java
   @Test
   void loadingFromAPI() {
     exchangeTransactionService.getExchangeTransaction();
-  }
-
-/*for branch dev-spring-batch*/
-  @Test
-  void loadingFromAPI_SpringBatch() {
-    generalTask.startGetAPI();
   }
 
   @Test
@@ -141,6 +113,15 @@ cube_demo/src/test/java/tw/com/cube/demo/cube_demo/CubeDemoApplicationTests.java
     vo.setStartDate("2024-01-02");
     vo.setEndDate("2024-01-02");
     vo.setCurrency("usd");
+    System.out.println(exchangeTransactionService.getHistory(vo));
+  }
+
+  @Test
+  void forexAPI_Error_WrongCurrency() {
+    ExchangeTransactionApiVo vo = new ExchangeTransactionApiVo();
+    vo.setStartDate("2024/01/02");
+    vo.setEndDate("2024/01/02");
+    vo.setCurrency("busd");
     System.out.println(exchangeTransactionService.getHistory(vo));
   }
 ```
