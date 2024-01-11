@@ -59,4 +59,13 @@ class CubeDemoApplicationTests {
     vo.setCurrency("usd");
     System.out.println(exchangeTransactionService.getHistory(vo));
   }
+
+  @Test
+  void forexAPI_Error_WrongCurrency() {
+    ExchangeTransactionApiVo vo = new ExchangeTransactionApiVo();
+    vo.setStartDate("2024/01/02");
+    vo.setEndDate("2024/01/02");
+    vo.setCurrency("busd");
+    System.out.println(exchangeTransactionService.getHistory(vo));
+  }
 }

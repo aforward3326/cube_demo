@@ -186,7 +186,7 @@ public class ExchangeTransactionService extends AbstractBasicService {
   private String checkValueFormat(String currency) throws InvalidDateFormatException {
     ExchangeTransactionReturnVo result = new ExchangeTransactionReturnVo();
     Error error = new Error();
-    if (currency.equals("USD")) {
+    if (!currency.equals("USD")) {
       error.setCode(MessageType.MSG_E004.getCode());
       error.setMessage(MessageType.MSG_E004.getMessage());
       result.setError(error);
