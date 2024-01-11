@@ -38,7 +38,7 @@ forex.api=https://openapi.taifex.com.tw/v1/DailyForeignExchangeRates
 
 2. branch dev-scheduled-task ---> @Schedule Task
 
-3. branch dev-spring-task ---> Spring Batch  
+3. branch dev-spring-batch ---> Spring Batch  
 
    test: GET localhost:8080/forexApi/batch
 
@@ -72,7 +72,7 @@ cube_demo/src/test/java/tw/com/cube/demo/cube_demo/CubeDemoApplicationTests.java
     exchangeTransactionService.getExchangeTransaction();
   }
 
-/*for branch dev-spring-task*/
+/*for branch dev-spring-batch*/
   @Test
   void loadingFromAPI_SpringBatch() {
     generalTask.startGetAPI();
