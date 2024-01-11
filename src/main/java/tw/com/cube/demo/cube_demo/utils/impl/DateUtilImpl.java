@@ -4,10 +4,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import tw.com.cube.demo.cube_demo.exception.InvalidDateFormatException;
 import tw.com.cube.demo.cube_demo.utils.DateUtil;
 
 @Component
@@ -22,7 +24,7 @@ public class DateUtilImpl implements DateUtil {
    * @return Date
    */
   @Override
-  public Date formatDate(Date date, int type) {
+  public Date formatDate(Date date, int type) throws InvalidDateFormatException {
     String formatDate;
     switch (type) {
       case 1:
@@ -52,38 +54,40 @@ public class DateUtilImpl implements DateUtil {
     String dfs = sdf.format(date);
     try {
       Date dateReturn = sdf.parse(dfs);
+      if (Objects.isNull(dateReturn)) {
+        throw new InvalidDateFormatException("Invalid Date Format");
+      }
       return dateReturn;
     } catch (ParseException e) {
-      logger.error(e.getMessage());
-      e.printStackTrace();
-      return null;
+      throw new InvalidDateFormatException("Invalid Date Format");
     }
   }
 
   @Override
-  public Date formatDate(Date date, String formatDate) {
+  public Date formatDate(Date date, String formatDate) throws InvalidDateFormatException {
     SimpleDateFormat sdf = new SimpleDateFormat(formatDate);
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
     String dfs = sdf.format(date);
     try {
       Date dateReturn = sdf.parse(dfs);
+      if (Objects.isNull(dateReturn)) {
+        throw new InvalidDateFormatException("Invalid Date Format");
+      }
       return dateReturn;
     } catch (ParseException e) {
-      logger.error(e.getMessage());
-      e.printStackTrace();
-      return null;
+      throw new InvalidDateFormatException("Invalid Date Format");
     }
   }
 
   @Override
-  public String formatDateString(Date date, String formatDate) {
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+  public String formatDateString(Date date, String formatDate) throws InvalidDateFormatException {
+    SimpleDateFormat sdf = new SimpleDateFormat(formatDate);
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
     return sdf.format(date);
   }
 
   @Override
-  public String formatDateString(Date date, int type) {
+  public String formatDateString(Date date, int type) throws InvalidDateFormatException {
     String formatDate;
     switch (type) {
       case 1:
@@ -121,7 +125,7 @@ public class DateUtilImpl implements DateUtil {
    * @return Date
    */
   @Override
-  public Date parseDate(String date, int type) {
+  public Date parseDate(String date, int type) throws InvalidDateFormatException {
     String formatDate = "yyyyMMdd";
     switch (type) {
       case 1:
@@ -149,29 +153,33 @@ public class DateUtilImpl implements DateUtil {
     SimpleDateFormat sdf = new SimpleDateFormat(formatDate);
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
     try {
-      return sdf.parse(date);
+      Date dateReturn = sdf.parse(date);
+      if (Objects.isNull(dateReturn)) {
+        throw new InvalidDateFormatException("Invalid Date Format");
+      }
+      return dateReturn;
     } catch (ParseException e) {
-      logger.error(e.getMessage());
-      e.printStackTrace();
-      return null;
+      throw new InvalidDateFormatException("Invalid Date Format");
     }
   }
 
   @Override
-  public Date parseDate(String date, String formatDate) {
+  public Date parseDate(String date, String formatDate) throws InvalidDateFormatException {
     SimpleDateFormat sdf = new SimpleDateFormat(formatDate);
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
     try {
-      return sdf.parse(date);
+      Date dateReturn = sdf.parse(date);
+      if (Objects.isNull(dateReturn)) {
+        throw new InvalidDateFormatException("Invalid Date Format");
+      }
+      return dateReturn;
     } catch (ParseException e) {
-      logger.error(e.getMessage());
-      e.printStackTrace();
-      return null;
+      throw new InvalidDateFormatException("Invalid Date Format");
     }
   }
 
   @Override
-  public Date pastYear(int year) {
+  public Date pastYear(int year) throws InvalidDateFormatException {
     Date currentDate = new Date();
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(currentDate);
@@ -180,7 +188,7 @@ public class DateUtilImpl implements DateUtil {
   }
 
   @Override
-  public Date pastDay(int day) {
+  public Date pastDay(int day) throws InvalidDateFormatException {
     Date currentDate = new Date();
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(currentDate);
