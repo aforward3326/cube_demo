@@ -111,7 +111,7 @@ public class ExchangeTransactionService extends AbstractBasicService {
     Error error = new Error();
     String startDateParam = params.getStartDate().trim();
     String endDateParam = params.getEndDate().trim();
-    String currency = params.getCurrency().trim();
+    String currency = params.getCurrency().toUpperCase().trim();
     try {
       String checkData = checkData(startDateParam, endDateParam, currency);
 
