@@ -10,6 +10,6 @@ import lombok.Setter;
 public class ExchangeTransactionDto implements Serializable {
   String date;
 
-  @JsonProperty("usd")
+  @JsonProperty("currency")
   String currency;
 }
