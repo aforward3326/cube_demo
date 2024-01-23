@@ -11,6 +11,17 @@
         <!-- 方法二：將 key 設定在 Server 的環境變數 -->
         <property name="passwordEnvName" value="WEB_PASSWORD"/>
     </bean>
+    <bean id="mongoDbProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="properties">
+            <props>
+                <prop key="spring.data.mongodb.username">${MONGO_USERNAME:}</prop>
+                <prop key="spring.data.mongodb.password">${MONGO_PASSWORD:}</prop>
+                <prop key="spring.data.mongodb.uri">mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@onlinemongo.x5lwpib.mongodb.net/</prop>
+                <prop key="spring.data.mongodb.database">cube</prop>
+                <!-- 如果需要在其他地方設定 username 和 password，可以使用相應的屬性 -->
+            </props>
+        </property>
+    </bean>
 
     <!-- 解密配置值設定 -->
     <bean id="configurationEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
