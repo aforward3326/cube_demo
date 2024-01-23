@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @SpringBootApplication
 @EnableMongoRepositories
+// @ImportResource("classpath:springconfig/spring-config.xml")
 public class CubeDemoApplication {
 
   public static void main(String[] args) {

@@ -11,4 +11,7 @@ import org.springframework.stereotype.Component;
 public class ApiUriConfig {
   @Value("${forex.api}")
   private String forexApi;
+
+  @Value("${forexcsv.api}")
+  private String forexCsvApi;
 }

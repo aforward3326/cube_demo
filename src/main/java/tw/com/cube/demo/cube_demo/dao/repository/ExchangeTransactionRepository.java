@@ -18,4 +18,13 @@ public interface ExchangeTransactionRepository
   @Query("{'$and': [{'date': {'$gte':  ?0 , '$lte':  ?1 }}, {'currencyUnit': ?2}]}")
   List<ExchangeTransaction> findHistoryByCurrencyUnit(
       Date startDate, Date endDate, String currencyUnit);
+
+  @Query("{'$and': [{'date':   ?0 }]}")
+  List<ExchangeTransaction> findPastDayHistory(Date startDate);
+
+  @Query("{'$and': [{'exchangeCurrencyUnit': ?0}]}")
+  List<ExchangeTransaction> findByExchangeCurrencyUnit(String exchangeCurrencyUnit);
+
+  @Query("{'$and': [{'date':   ?0 },{'exchangeCurrencyUnit': ?0}]}")
+  List<ExchangeTransaction> findByExchangeCurrencyUnit(Date date, String exchangeCurrencyUnit);
 }
