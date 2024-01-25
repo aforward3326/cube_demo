@@ -9,12 +9,16 @@ import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.stereotype.Service;
 import tw.com.cube.demo.cube_demo.config.ApiUriConfig;
 import tw.com.cube.demo.cube_demo.dao.dto.ExchangeTransactionDataDto;
 import tw.com.cube.demo.cube_demo.dao.dto.ExchangeTransactionDto;
 import tw.com.cube.demo.cube_demo.dao.po.ExchangeTransaction;
 import tw.com.cube.demo.cube_demo.dao.repository.ExchangeTransactionRepository;
+import tw.com.cube.demo.cube_demo.dao.vo.ReturnVo;
+import tw.com.cube.demo.cube_demo.dao.vo.SelectVo;
 import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.*;
 import tw.com.cube.demo.cube_demo.dao.vo.exchangeTransaction.Error;
 import tw.com.cube.demo.cube_demo.exception.InvalidDateFormatException;
@@ -29,6 +33,7 @@ public class ExchangeTransactionService extends AbstractBasicService {
   private final DateUtil dateUtil;
   private final ExchangeTransactionRepository exchangeTransactionRepository;
   private final ApiUriConfig apiUriConfig;
+  private final MongoTemplate mongoTemplate;
 
   /** get data from API then write tp DB */
   public void getExchangeTransaction() {
@@ -357,5 +362,28 @@ public class ExchangeTransactionService extends AbstractBasicService {
     result.setCurrency(exchangeTransactionList);
     return apiResponse(result)
         .replace("currency", exchangeTransactions.get(0).getCurrencyUnit().toLowerCase());
+  }
+
+  public String getExchangeSelect() {
+    ReturnVo returnVo = new ReturnVo();
+
+    Map<String, Object> result = new HashMap<>();
+
+    Aggregation aggregation = Aggregation.newAggregation(Aggregation.group("exchangeCurrencyUnit"));
+
+    List<Map> list =
+        mongoTemplate
+            .aggregate(aggregation, ExchangeTransaction.class, Map.class)
+            .getMappedResults();
+    List<SelectVo> select = new ArrayList<>();
+    for (Map obj : list) {
+      SelectVo selectVo = new SelectVo();
+      selectVo.setLabel((String) obj.get("_id"));
+      selectVo.setValue((String) obj.get("_id"));
+      select.add(selectVo);
+    }
+    result.put("result", select);
+    returnVo.setResult(result);
+    return apiResponse(returnVo);
   }
 }

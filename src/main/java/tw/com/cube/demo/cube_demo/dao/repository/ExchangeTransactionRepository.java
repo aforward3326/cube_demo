@@ -2,6 +2,8 @@ package tw.com.cube.demo.cube_demo.dao.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -22,9 +24,12 @@ public interface ExchangeTransactionRepository
   @Query("{'$and': [{'date':   ?0 }]}")
   List<ExchangeTransaction> findPastDayHistory(Date startDate);
 
-  @Query("{'$and': [{'exchangeCurrencyUnit': ?0}]}")
+  @Query("{'$and': [{'exchangeCurrencyUnit': ?1}]}")
   List<ExchangeTransaction> findByExchangeCurrencyUnit(String exchangeCurrencyUnit);
 
-  @Query("{'$and': [{'date':   ?0 },{'exchangeCurrencyUnit': ?0}]}")
+  @Query("{'$and': [{'date':   ?0 },{'exchangeCurrencyUnit': ?1}]}")
   List<ExchangeTransaction> findByExchangeCurrencyUnit(Date date, String exchangeCurrencyUnit);
+
+  @Aggregation(pipeline = {"{ $group: { _id: '$exchangeCurrencyUnit' } }"})
+  List<Map<String, Object>> groupByExchangeCurrencyUnit();
 }
